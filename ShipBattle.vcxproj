@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{c23b3bc9-e003-438e-b5a0-2cc25c476899}</ProjectGuid>
+    <RootNamespace>ShipBattle</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Configuration)\obj\</IntDir>
+    <TargetName>ShipBattle</TargetName>
+    <IncludePath>$(SolutionDir)src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Configuration)\obj\</IntDir>
+    <TargetName>ShipBattle</TargetName>
+    <IncludePath>$(SolutionDir)src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\audio\AudioClient.h" />
+    <ClInclude Include="src\audio\AudioVoice.h" />
+    <ClInclude Include="src\audio\XAudioLoader.h" />
+    <ClInclude Include="src\game\ai\GameAI.h" />
+    <ClInclude Include="src\game\Game.h" />
+    <ClInclude Include="src\game\GlobalState.h" />
+    <ClInclude Include="src\game\IOState.h" />
+    <ClInclude Include="src\game\IGameState.h" />
+    <ClInclude Include="src\game\states\ComputerAim.h" />
+    <ClInclude Include="src\game\states\ComputerHit.h" />
+    <ClInclude Include="src\game\states\ComputerNoHit.h" />
+    <ClInclude Include="src\game\states\ComputerShooting.h" />
+    <ClInclude Include="src\game\states\PlayerLost.h" />
+    <ClInclude Include="src\game\states\PlayerNoHit.h" />
+    <ClInclude Include="src\game\states\MainMenue.h" />
+    <ClInclude Include="src\game\states\PlaceFleet.h" />
+    <ClInclude Include="src\game\states\PlayerAim.h" />
+    <ClInclude Include="src\game\states\PlayerHit.h" />
+    <ClInclude Include="src\game\states\PlayerShooting.h" />
+    <ClInclude Include="src\game\states\PlayerWin.h" />
+    <ClInclude Include="src\game\tools\GeneralHelpers.h" />
+    <ClInclude Include="src\game\tools\ShipFunctions.h" />
+    <ClInclude Include="src\gfx\GBuffer.h" />
+    <ClInclude Include="src\gfx\GContext.h" />
+    <ClInclude Include="src\gfx\GDescHeap.h" />
+    <ClInclude Include="src\gfx\GHeap.h" />
+    <ClInclude Include="src\gfx\GRootSignature.h" />
+    <ClInclude Include="src\gfx\GShader.h" />
+    <ClInclude Include="src\gfx\GTexture.h" />
+    <ClInclude Include="src\gfx\GWindow.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\rendering\EasyTex.h" />
+    <ClInclude Include="src\rendering\QuadManger.h" />
+    <ClInclude Include="src\rendering\RenderState.h" />
+    <ClInclude Include="src\rendering\Vertex.h" />
+    <ClInclude Include="src\tools\dxnames.h" />
+    <ClInclude Include="src\tools\EasyHWND.h" />
+    <ClInclude Include="src\tools\ScopedComPointer.h" />
+    <ClInclude Include="src\tools\StopWatch.h" />
+    <ClInclude Include="src\tools\WICImageProcessor.h" />
+    <ClInclude Include="src\tools\WICMeta.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\audio\AudioClient.cpp" />
+    <ClCompile Include="src\audio\AudioVoice.cpp" />
+    <ClCompile Include="src\audio\XAudioLoader.cpp" />
+    <ClCompile Include="src\game\ai\GameAI.cpp" />
+    <ClCompile Include="src\game\Game.cpp" />
+    <ClCompile Include="src\game\states\ComputerAim.cpp" />
+    <ClCompile Include="src\game\states\ComputerHit.cpp" />
+    <ClCompile Include="src\game\states\ComputerNoHit.cpp" />
+    <ClCompile Include="src\game\states\ComputerShooting.cpp" />
+    <ClCompile Include="src\game\states\MainMenue.cpp" />
+    <ClCompile Include="src\game\states\PlaceFleet.cpp" />
+    <ClCompile Include="src\game\states\PlayerAim.cpp" />
+    <ClCompile Include="src\game\states\PlayerHit.cpp" />
+    <ClCompile Include="src\game\states\PlayerLost.cpp" />
+    <ClCompile Include="src\game\states\PlayerNoHit.cpp" />
+    <ClCompile Include="src\game\states\PlayerShooting.cpp" />
+    <ClCompile Include="src\game\states\PlayerWin.cpp" />
+    <ClCompile Include="src\game\tools\GeneralHelpers.cpp" />
+    <ClCompile Include="src\game\tools\ShipFunctions.cpp" />
+    <ClCompile Include="src\gfx\GContext.cpp" />
+    <ClCompile Include="src\gfx\GDescHeap.cpp" />
+    <ClCompile Include="src\gfx\GHeap.cpp" />
+    <ClCompile Include="src\gfx\GRootSignature.cpp" />
+    <ClCompile Include="src\gfx\GShader.cpp" />
+    <ClCompile Include="src\gfx\GTexture.cpp" />
+    <ClCompile Include="src\gfx\GWindow.cpp" />
+    <ClCompile Include="src\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\rendering\EasyTex.cpp" />
+    <ClCompile Include="src\rendering\QuadManger.cpp" />
+    <ClCompile Include="src\rendering\RenderState.cpp" />
+    <ClCompile Include="src\tools\StopWatch.cpp" />
+    <ClCompile Include="src\tools\WICImageProcessor.cpp" />
+    <ClCompile Include="src\tools\WICMeta.cpp" />
+    <ClCompile Include="src\wWinMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="src\shader\ImageQuadPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="src\shader\ImageQuadVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="src\shader\RootSignature.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">RootSignature</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RootSignature</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">rootsig_1.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">rootsig_1.1</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ROOTSIG</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ROOTSIG</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
