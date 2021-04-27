@@ -73,17 +73,14 @@ To finish the game and return to the main screen click on the "you lost" icon.
 ![Install_Summary](https://github.com/Ohjurot/ShipBattle/raw/main/doc/install_4.jpg)
 
 - The installer will show you a summary of the installation task
-
 - click install
 
-  ![Install_Running](https://github.com/Ohjurot/ShipBattle/raw/main/doc/install_5.jpg)
+![Install_Running](https://github.com/Ohjurot/ShipBattle/raw/main/doc/install_5.jpg)
 
 - The installer is now installing all required files 
-
 - please wait
 
-  ![Install_Done](https://github.com/Ohjurot/ShipBattle/raw/main/doc/install_6.jpg)
+![Install_Done](https://github.com/Ohjurot/ShipBattle/raw/main/doc/install_6.jpg)
 
 - As soon as the installer finished you have the option to directly start the game
-
 - click finish
