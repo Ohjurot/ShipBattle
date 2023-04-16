@@ -125,7 +125,6 @@
     <ClInclude Include="src\gfx\GBuffer.h" />
     <ClInclude Include="src\gfx\GContext.h" />
     <ClInclude Include="src\gfx\GDescHeap.h" />
-    <ClInclude Include="src\gfx\GHeap.h" />
     <ClInclude Include="src\gfx\GRootSignature.h" />
     <ClInclude Include="src\gfx\GShader.h" />
     <ClInclude Include="src\gfx\GTexture.h" />
@@ -166,7 +165,6 @@
     <ClCompile Include="src\game\tools\ShipFunctions.cpp" />
     <ClCompile Include="src\gfx\GContext.cpp" />
     <ClCompile Include="src\gfx\GDescHeap.cpp" />
-    <ClCompile Include="src\gfx\GHeap.cpp" />
     <ClCompile Include="src\gfx\GRootSignature.cpp" />
     <ClCompile Include="src\gfx\GShader.cpp" />
     <ClCompile Include="src\gfx\GTexture.cpp" />

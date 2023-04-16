@@ -1,14 +1,13 @@
 #pragma once
 
 #include <gfx/GContext.h>
-#include <gfx/GHeap.h>
 #include <gfx/GBuffer.h>
 
 #include <rendering/Vertex.h>
 
 class QuadManger {
 	public:
-		QuadManger(ID3D12Device* ptrDevice, GHeap& refHeapGpu, GHeap& refHeapUpload);
+		QuadManger(ID3D12Device* ptrDevice);
 
 		void addQuad(TextureQuad& quad);
 		UINT64 uploadReset(ID3D12GraphicsCommandList* ptrCmdList);

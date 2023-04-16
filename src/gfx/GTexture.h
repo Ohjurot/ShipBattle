@@ -4,14 +4,13 @@
 #include <tools/WICMeta.h>
 #include <tools/WICImageProcessor.h>
 
-#include <gfx/GHeap.h>
 #include <gfx/GBuffer.h>
 #include <gfx/GContext.h>
 
 class GTexture {
 	public:
 		template<unsigned int N>
-		GTexture(LPCWSTR path, GContext& refContext, GHeap& refHeap, GBuffer<BYTE, N>& refUploadBuffer) {
+		GTexture(LPCWSTR path, GContext& refContext, D3D12_HEAP_TYPE heapType, GBuffer<BYTE, N>& refUploadBuffer) {
 			// Open texture
 			WIC_META fileMeta;
 			if (!WicIO::open(path, fileMeta)) {
@@ -47,15 +46,17 @@ class GTexture {
 			rd.Flags = D3D12_RESOURCE_FLAG_NONE;
 			rd.Alignment = 1024 * 64;
 
-			// Check size and alloc
-			UINT64 size = refContext.getDevice()->GetResourceAllocationInfo(NULL, 1, &rd).SizeInBytes;
-			UINT64 offset;
-			if (!refHeap.heapAllocate(size, &offset)) {
-				return;
-			}
+			// Heap
+            D3D12_HEAP_PROPERTIES heapProperties;
+            ZeroMemory(&heapProperties, sizeof(D3D12_HEAP_PROPERTIES));
+            heapProperties.Type = heapType;
+			heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            heapProperties.CreationNodeMask = 0;
+            heapProperties.VisibleNodeMask = 0;
 
 			// Create texture
-			if (FAILED(refContext.getDevice()->CreatePlacedResource(refHeap.getHeap(), offset, &rd, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(m_texture.to())))) {
+			if (FAILED(refContext.getDevice()->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &rd, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(m_texture.to())))) {
 				return;
 			}
 			m_texture.name(path);

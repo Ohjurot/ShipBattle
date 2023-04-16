@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "QuadManger.h"
 
-QuadManger::QuadManger(ID3D12Device* ptrDevice, GHeap& refHeapGpu, GHeap& refHeapUpload) :
-	m_vertexBuffer(ptrDevice, refHeapGpu, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER),
-	m_uploadBuffer(ptrDevice, refHeapUpload)
+QuadManger::QuadManger(ID3D12Device* ptrDevice) :
+	m_vertexBuffer(ptrDevice, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON),
+	m_uploadBuffer(ptrDevice, D3D12_HEAP_TYPE_UPLOAD)
 {}
 
 void QuadManger::addQuad(TextureQuad& quad) {

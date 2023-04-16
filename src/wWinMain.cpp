@@ -2,7 +2,6 @@
 
 #include <gfx/GContext.h>
 #include <gfx/GWindow.h>
-#include <gfx/GHeap.h>
 #include <gfx/GBuffer.h>
 #include <gfx/GTexture.h>
 #include <gfx/GDescHeap.h>
@@ -53,26 +52,22 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	// Maximize
 	ShowWindow((HWND)wnd, SW_MAXIMIZE);
 
-	// Heaps
-	GHeap gpuHeap(ctx.getDevice(), D3D12_HEAP_TYPE_DEFAULT, 1024 * 1024 * 32);
-	GHeap uploadHeap(ctx.getDevice(), D3D12_HEAP_TYPE_UPLOAD, 1024 * 1024 * 64);
-
 	// Upload buffer
-	GBuffer<BYTE, 1024 * 1024 * 32> uploadBuffer(ctx.getDevice(), uploadHeap);
+	GBuffer<BYTE, 1024 * 1024 * 32> uploadBuffer(ctx.getDevice(), D3D12_HEAP_TYPE_UPLOAD);
 
 	// Textures
-	GTexture tilemap(L"./res/tilemap.png", ctx, gpuHeap, uploadBuffer);
-	GTexture backgroundPlay(L"./res/screen_play.png", ctx, gpuHeap, uploadBuffer);
-	GTexture backgroundStart(L"./res/screen_start.png", ctx, gpuHeap, uploadBuffer);
+	GTexture tilemap(L"./res/tilemap.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture backgroundPlay(L"./res/screen_play.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture backgroundStart(L"./res/screen_start.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
 
-	GTexture statPlaceFleet(L"./res/stat_place_fleet.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statPlaceShot(L"./res/stat_place_shot.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statPlaceShotPC(L"./res/stat_wait_enemy.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statFireShot(L"./res/stat_shot_traveling.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statShotHit(L"./res/stat_hit.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statShotNoHit(L"./res/stat_nohit.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statGameWin(L"./res/stat_game_win.png", ctx, gpuHeap, uploadBuffer);
-	GTexture statGameLost(L"./res/stat_game_lost.png", ctx, gpuHeap, uploadBuffer);
+	GTexture statPlaceFleet(L"./res/stat_place_fleet.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statPlaceShot(L"./res/stat_place_shot.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statPlaceShotPC(L"./res/stat_wait_enemy.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statFireShot(L"./res/stat_shot_traveling.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statShotHit(L"./res/stat_hit.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statShotNoHit(L"./res/stat_nohit.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statGameWin(L"./res/stat_game_win.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
+	GTexture statGameLost(L"./res/stat_game_lost.png", ctx, D3D12_HEAP_TYPE_DEFAULT, uploadBuffer);
 
 	// Create heap and views
 	GDescHeap textureDHeap(ctx.getDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 11);
@@ -101,7 +96,7 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	RenderState renderState(ctx.getDevice(), rootSignature.getSignature(), vertexShader, pixelShader);
 
 	// Quad manager
-	QuadManger vertexQuadManager(ctx.getDevice(), gpuHeap, uploadHeap);
+	QuadManger vertexQuadManager(ctx.getDevice());
 
 	// Timer
 	StopWatch timer;
