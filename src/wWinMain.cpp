@@ -131,6 +131,14 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	// Loop
 	MSG msg = {};
 	while (!wnd.checkWindowCloseFlag()) {
+		// Resize
+		if (wnd.needsResizing())
+		{
+			ctx.flush();
+			wnd.resize(ctx.getDevice());
+		}
+		
+
 		// Event loop
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
@@ -153,8 +161,8 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 		ptrCmdList->SetGraphicsRootDescriptorTable(0, textureDHeap.getGpuHandle());
 
 		// Viewport and rect
-		const D3D12_VIEWPORT vp = {0,0,1920,1080,0.0f,1.0f};
-		const D3D12_RECT sr = { 0,0,1920,1080 };
+		const D3D12_VIEWPORT vp = {0,0,wnd.getWidth(),wnd.getHeight(),0.0f,1.0f};
+		const D3D12_RECT sr = { 0,0,wnd.getWidth(),wnd.getHeight() };
 		ptrCmdList->RSSetViewports(1, &vp);
 		ptrCmdList->RSSetScissorRects(1, &sr);
 

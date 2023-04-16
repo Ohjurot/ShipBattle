@@ -10,18 +10,36 @@ class GWindow : public EasyHWND::Window{
 
 		bool handleWindowMessage(LRESULT* ptrLRESULT, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 
+		void resize(ID3D12Device* device);
+
 		void beginFrame(ID3D12GraphicsCommandList* ptrCmdList);
 		void endFrame(ID3D12GraphicsCommandList* ptrCmdList);
 		bool present();
 
 		GameIOState getCurrentIOState();
 
+		inline bool needsResizing() const { return m_needsResize;  }
+		inline int getWidth() const { return m_width;  }
+		inline int getHeight() const { return m_height;  }
+
+	private:
+		void createDepthBuffer(ID3D12Device* device);
+		void destroyDepthBuffer();
+
+		void getBuffers(ID3D12Device* device);
+		void releaseBuffers();
+
 	private:
 		GameIOState m_iostate;
 
-		unsigned int m_currentBuffer = 0;
+		bool m_needsResize = false;
+
 		unsigned int m_heapIncrement = 0;
-		ScopedComPointer<IDXGISwapChain1> m_swapChain;
+
+		int m_width = -1;
+		int m_height = -1;
+
+		ScopedComPointer<IDXGISwapChain4> m_swapChain;
 		ScopedComPointer<ID3D12DescriptorHeap> m_descHeap;
 		ScopedComPointer<ID3D12Resource> m_buffers[2];
 

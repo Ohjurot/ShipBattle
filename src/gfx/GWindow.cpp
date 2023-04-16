@@ -2,7 +2,7 @@
 #include "GWindow.h"
 
 GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12CommandQueue* ptrQueue)
-	: EasyHWND::Window(wClass, L"Ship Battle V1.0 © Copyright 2021 by Ludwig Füchsl", 100, 100, 1920, 1080, WS_CAPTION | WS_SYSMENU),
+	: EasyHWND::Window(wClass, L"Ship Battle V1.0 © Copyright 2021 by Ludwig Füchsl", 100, 100, 1920, 1080, WS_OVERLAPPEDWINDOW, WS_EX_OVERLAPPEDWINDOW),
 	m_iostate({})
 {
 	// Adjust windows size
@@ -41,7 +41,11 @@ GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12C
 	fd.Windowed = true;
 
 	// Create Swap Chain
-	if (FAILED(ptrFactory->CreateSwapChainForHwnd(ptrQueue, this->operator HWND(), &ds, &fd, NULL, m_swapChain.to()))) {
+	ScopedComPointer<IDXGISwapChain1> tempChain;
+	if (FAILED(ptrFactory->CreateSwapChainForHwnd(ptrQueue, this->operator HWND(), &ds, &fd, NULL, tempChain.to()))) {
+		return;
+	}
+	if (FAILED(tempChain->QueryInterface(IID_PPV_ARGS(m_swapChain.to())))) {
 		return;
 	}
 
@@ -59,18 +63,7 @@ GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12C
 	// Heap increment
 	m_heapIncrement = ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	// Get buffers
-	for (unsigned int i = 0; i < 2; i++) {
-		// Get buffer
-		if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(m_buffers[i].to())))) {
-			return;
-		}
-
-		// Create view
-		D3D12_CPU_DESCRIPTOR_HANDLE heapHandle = m_descHeap->GetCPUDescriptorHandleForHeapStart();
-		heapHandle.ptr += i * m_heapIncrement;
-		ptrDevice->CreateRenderTargetView(m_buffers[i], NULL, heapHandle);
-	}
+	getBuffers(ptrDevice);
 
 	// Depth HEAP
 	D3D12_DESCRIPTOR_HEAP_DESC hdd;
@@ -83,51 +76,32 @@ GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12C
 		return;
 	}
 
-	// DB Heap
-	D3D12_HEAP_PROPERTIES hprop;
-	hprop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	hprop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	hprop.Type = D3D12_HEAP_TYPE_DEFAULT;
-	hprop.CreationNodeMask = NULL;
-	hprop.VisibleNodeMask = NULL;
-
-	// Depth buffer
-	D3D12_RESOURCE_DESC dbd;
-	ZeroMemory(&dbd, sizeof(D3D12_RESOURCE_DESC));
-	dbd.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	dbd.Alignment = 1024 * 64;
-	dbd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dbd.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-	dbd.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	dbd.MipLevels = 1;
-	dbd.SampleDesc.Count = 1;
-	dbd.SampleDesc.Quality = 0;
-	dbd.Height = 1080;
-	dbd.Width = 1920;
-	dbd.DepthOrArraySize = 1;
-
-	// Clear value
-	D3D12_CLEAR_VALUE dbdc;
-	dbdc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dbdc.DepthStencil.Depth = 0.0f;
-
-	ptrDevice->CreateCommittedResource(&hprop, D3D12_HEAP_FLAG_NONE, &dbd, D3D12_RESOURCE_STATE_DEPTH_WRITE, &dbdc, IID_PPV_ARGS(m_depthBuffer.to()));
-
-	// Create view
-	ptrDevice->CreateDepthStencilView(m_depthBuffer, NULL, m_depthHeap->GetCPUDescriptorHandleForHeapStart());
+	createDepthBuffer(ptrDevice);
 }
 
 GWindow::~GWindow(){
 	m_descHeap.release();
-	m_buffers[0].release();
-	m_buffers[1].release();
+	releaseBuffers();
 	m_swapChain.release();
-
+	destroyDepthBuffer();
 }
 
 bool GWindow::handleWindowMessage(LRESULT* ptrLRESULT, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	// Switch on message
 	switch (msg) {
+		// Window resize
+		case WM_SIZE:
+		{
+            RECT cr;
+            if (GetClientRect((HWND)*this, &cr))
+            {
+				m_width = cr.right - cr.left;
+				m_height = cr.bottom - cr.top;
+            }
+            m_needsResize = true;
+			break;
+		}
+
 		// Key down
 		case WM_KEYDOWN: {
 			// Check enter
@@ -184,12 +158,29 @@ bool GWindow::handleWindowMessage(LRESULT* ptrLRESULT, HWND hwnd, UINT msg, WPAR
 	return EasyHWND::Window::handleWindowMessage(ptrLRESULT, hwnd, msg, wParam, lParam);
 }
 
-void GWindow::beginFrame(ID3D12GraphicsCommandList* ptrCmdList) {	
+void GWindow::resize(ID3D12Device* device)
+{
+	if (m_needsResize)
+	{
+        releaseBuffers();
+        m_swapChain->ResizeBuffers(0, m_width, m_height, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+        getBuffers(device);
+
+		destroyDepthBuffer();
+		createDepthBuffer(device);
+
+        m_needsResize = false;
+	}
+}
+
+void GWindow::beginFrame(ID3D12GraphicsCommandList* ptrCmdList) {		
+	auto bufferIndex = m_swapChain->GetCurrentBackBufferIndex();
+	
 	// Resource barrier
 	D3D12_RESOURCE_BARRIER barr;
 	ZeroMemory(&barr, sizeof(D3D12_RESOURCE_BARRIER));
 	barr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barr.Transition.pResource = m_buffers[m_currentBuffer];
+	barr.Transition.pResource = m_buffers[bufferIndex];
 	barr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	barr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barr.Transition.Subresource = 0;
@@ -200,7 +191,7 @@ void GWindow::beginFrame(ID3D12GraphicsCommandList* ptrCmdList) {
 
 	// RTV Handle
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_descHeap->GetCPUDescriptorHandleForHeapStart();
-	rtvHandle.ptr += m_heapIncrement * m_currentBuffer;
+	rtvHandle.ptr += m_heapIncrement * bufferIndex;
 
 	// Clear RTV
 	const float rtvCC[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -215,11 +206,13 @@ void GWindow::beginFrame(ID3D12GraphicsCommandList* ptrCmdList) {
 }
 
 void GWindow::endFrame(ID3D12GraphicsCommandList* ptrCmdList) {
+	auto bufferIndex = m_swapChain->GetCurrentBackBufferIndex();
+
 	// Resource barrier
 	D3D12_RESOURCE_BARRIER barr;
 	ZeroMemory(&barr, sizeof(D3D12_RESOURCE_BARRIER));
 	barr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barr.Transition.pResource = m_buffers[m_currentBuffer];
+	barr.Transition.pResource = m_buffers[bufferIndex];
 	barr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	barr.Transition.Subresource = 0;
@@ -230,10 +223,71 @@ void GWindow::endFrame(ID3D12GraphicsCommandList* ptrCmdList) {
 }
 
 bool GWindow::present() {
-	m_currentBuffer = (m_currentBuffer + 1) % 2;
 	return SUCCEEDED(m_swapChain->Present(1, 0));
 }
 
 GameIOState GWindow::getCurrentIOState() {
 	return m_iostate;
+}
+
+void GWindow::createDepthBuffer(ID3D12Device* device)
+{
+    // DB Heap
+    D3D12_HEAP_PROPERTIES hprop;
+    hprop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    hprop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    hprop.Type = D3D12_HEAP_TYPE_DEFAULT;
+    hprop.CreationNodeMask = NULL;
+    hprop.VisibleNodeMask = NULL;
+
+    // Depth buffer
+    D3D12_RESOURCE_DESC dbd;
+    ZeroMemory(&dbd, sizeof(D3D12_RESOURCE_DESC));
+    dbd.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    dbd.Alignment = 1024 * 64;
+    dbd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dbd.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+    dbd.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    dbd.MipLevels = 1;
+    dbd.SampleDesc.Count = 1;
+    dbd.SampleDesc.Quality = 0;
+    dbd.Height = m_height;
+    dbd.Width = m_width;
+    dbd.DepthOrArraySize = 1;
+
+    // Clear value
+    D3D12_CLEAR_VALUE dbdc;
+    dbdc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dbdc.DepthStencil.Depth = 0.0f;
+
+	device->CreateCommittedResource(&hprop, D3D12_HEAP_FLAG_NONE, &dbd, D3D12_RESOURCE_STATE_DEPTH_WRITE, &dbdc, IID_PPV_ARGS(m_depthBuffer.to()));
+
+    // Create view
+	device->CreateDepthStencilView(m_depthBuffer, NULL, m_depthHeap->GetCPUDescriptorHandleForHeapStart());
+}
+
+void GWindow::destroyDepthBuffer()
+{
+	m_depthBuffer.release();
+}
+
+void GWindow::getBuffers(ID3D12Device* device)
+{
+    for (unsigned int i = 0; i < 2; i++) {
+        // Get buffer
+        if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(m_buffers[i].to())))) {
+            return;
+        }
+
+        // Create view
+        D3D12_CPU_DESCRIPTOR_HANDLE heapHandle = m_descHeap->GetCPUDescriptorHandleForHeapStart();
+        heapHandle.ptr += i * m_heapIncrement;
+        device->CreateRenderTargetView(m_buffers[i], NULL, heapHandle);
+    }
+}
+
+void GWindow::releaseBuffers()
+{
+    m_buffers[0].release();
+    m_buffers[1].release();
 }
