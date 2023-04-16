@@ -17,7 +17,11 @@ GHeap::GHeap(ID3D12Device* ptrDevice, D3D12_HEAP_TYPE type, UINT64 size) :
 	hd.Flags = D3D12_HEAP_FLAG_NONE;
 
 	// Create heap
-	ptrDevice->CreateHeap(&hd, IID_PPV_ARGS(m_heap.to()));
+	HRESULT hr;
+	if (FAILED(hr = ptrDevice->CreateHeap(&hd, IID_PPV_ARGS(m_heap.to())))) {
+		GetLogger().log("ptrDevice->CreateHeap(...) failed").log(hr);
+		return;
+	}
 }
 
 GHeap::~GHeap() {

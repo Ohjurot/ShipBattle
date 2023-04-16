@@ -15,6 +15,7 @@
 #include <wincodec.h>
 
 // My stuff
+#include <tools/log.h>
 #include <tools/EasyHWND.h>
 #include <tools/ScopedComPointer.h>
 #include <tools/dxnames.h>

@@ -9,8 +9,16 @@ GDescHeap::GDescHeap(ID3D12Device* ptrDevice, D3D12_DESCRIPTOR_HEAP_TYPE type, U
 	hd.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	hd.NodeMask = NULL;
 
-	ptrDevice->CreateDescriptorHeap(&hd, IID_PPV_ARGS(m_heap.to()));
+	HRESULT hr;
+	if (FAILED(hr = ptrDevice->CreateDescriptorHeap(&hd, IID_PPV_ARGS(m_heap.to())))) {
+		GetLogger().log("ptrDevice->CreateDescriptorHeap(...) failed!").log(hr);
+		return;
+	}
+	
 	m_handleIncrement = ptrDevice->GetDescriptorHandleIncrementSize(type);
+	if (m_handleIncrement == 0) {
+		GetLogger().log("ptrDevice->GetDescriptorHandleIncrementSize(...) return 0!");
+	}
 }
 
 GDescHeap::~GDescHeap() {

@@ -138,6 +138,12 @@
     <ClInclude Include="src\game\ai\GameAI.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\tools\logger.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tools\log.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pch.cpp">
@@ -240,6 +246,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\game\ai\GameAI.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\logger.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

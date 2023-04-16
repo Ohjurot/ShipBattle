@@ -4,6 +4,8 @@
 AudioVoice::AudioVoice(IXAudio2* ptrAudio, LPCWSTR file) :
 	m_buffer(XAudioLoader::loadFromFile(file))
 {
+	HRESULT hr;
+
 	// Abort if invlid
 	if (!m_buffer.ptr()) {
 		return;
@@ -11,7 +13,8 @@ AudioVoice::AudioVoice(IXAudio2* ptrAudio, LPCWSTR file) :
 
 	// Create voice
 	auto wv = m_buffer.wav();
-	if (FAILED(ptrAudio->CreateSourceVoice(&m_ptrVoice, (WAVEFORMATEX*)&wv))) {
+	if (FAILED(hr = ptrAudio->CreateSourceVoice(&m_ptrVoice, (WAVEFORMATEX*)&wv))) {
+		GetLogger().log("ptrAudio->CreateSourceVoice(...) failed!").log(hr);
 		return;
 	}
 }
@@ -21,6 +24,8 @@ AudioVoice::~AudioVoice(){
 }
 
 void AudioVoice::play(bool loop){	
+	HRESULT hr;
+
 	// Create buffer
 	XAUDIO2_BUFFER buffer;
 	ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
@@ -38,16 +43,29 @@ void AudioVoice::play(bool loop){
 	}
 
 	// Submit buffer and play
-	m_ptrVoice->SubmitSourceBuffer(&buffer);
+	if (FAILED(hr = m_ptrVoice->SubmitSourceBuffer(&buffer))) {
+		GetLogger().log("m_ptrVoice->SubmitSourceBuffer(...) failed!").log(hr);
+		return;
+	}
 	m_ptrVoice->Start();
 }
 
 void AudioVoice::stop(){
+	HRESULT hr;
+
 	// stop
-	m_ptrVoice->Stop();
+	if (FAILED(hr = m_ptrVoice->Stop())) {
+        GetLogger().log("m_ptrVoice->Stop(...) failed!").log(hr);
+        return;
+	}
 }
 
 void AudioVoice::setVolume(float vol) {
+	HRESULT hr;
+
 	// Set volume
-	m_ptrVoice->SetVolume(vol);
+	if (FAILED(hr = m_ptrVoice->SetVolume(vol))) {
+        GetLogger().log("m_ptrVoice->SetVolume(...) failed!").log(hr);
+        return;
+	}
 }

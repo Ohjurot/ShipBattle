@@ -2,7 +2,11 @@
 #include "GRootSignature.h"
 
 GRootSignature::GRootSignature(ID3D12Device* ptrDevice, void* ptrData, UINT64 size) {
-	ptrDevice->CreateRootSignature(NULL, ptrData, size, IID_PPV_ARGS(m_rootSignature.to()));
+	HRESULT hr;
+	if (FAILED(hr = ptrDevice->CreateRootSignature(NULL, ptrData, size, IID_PPV_ARGS(m_rootSignature.to())))) {
+		GetLogger().log("ptrDevice->CreateRootSignature(...) failed!").log(hr);
+		return;
+	}
 }
 
 GRootSignature::~GRootSignature() {

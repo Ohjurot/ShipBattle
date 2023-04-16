@@ -63,7 +63,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -84,7 +84,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -137,6 +137,8 @@
     <ClInclude Include="src\rendering\Vertex.h" />
     <ClInclude Include="src\tools\dxnames.h" />
     <ClInclude Include="src\tools\EasyHWND.h" />
+    <ClInclude Include="src\tools\log.h" />
+    <ClInclude Include="src\tools\logger.h" />
     <ClInclude Include="src\tools\ScopedComPointer.h" />
     <ClInclude Include="src\tools\StopWatch.h" />
     <ClInclude Include="src\tools\WICImageProcessor.h" />
@@ -176,6 +178,7 @@
     <ClCompile Include="src\rendering\EasyTex.cpp" />
     <ClCompile Include="src\rendering\QuadManger.cpp" />
     <ClCompile Include="src\rendering\RenderState.cpp" />
+    <ClCompile Include="src\tools\logger.cpp" />
     <ClCompile Include="src\tools\StopWatch.cpp" />
     <ClCompile Include="src\tools\WICImageProcessor.cpp" />
     <ClCompile Include="src\tools\WICMeta.cpp" />

@@ -18,9 +18,13 @@
 #include <audio/AudioVoice.h>
 
 #include <tools/StopWatch.h>
+#include <tools/log.h>
 #include <game/Game.h>
 
 INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, LPWSTR _In_ cmdArgs, INT _In_ nCmdShow) {
+	Logger logger;
+	SetLogger(logger);
+	
 	// Debug
 #ifdef _DEBUG
 	ScopedComPointer<ID3D12Debug> ptrDebug;
@@ -29,7 +33,9 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 #endif
 
 	// Co init
-	if (FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED))) {
+	HRESULT hr;
+	if (FAILED(hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED))) {
+		GetLogger().log("CoInitializeEx(...) failed!").log(hr);
 		return -1;
 	}
 	
@@ -43,6 +49,9 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	EasyHWND::WindowClass cls(L"ShipBattle_WND", CS_OWNDC);
 	GWindow wnd(cls, ctx.getDevice(), ctx.getQueue());
 	wnd.setWindowVisibility(true);
+
+	// Maximize
+	ShowWindow((HWND)wnd, SW_MAXIMIZE);
 
 	// Heaps
 	GHeap gpuHeap(ctx.getDevice(), D3D12_HEAP_TYPE_DEFAULT, 1024 * 1024 * 128);
@@ -181,6 +190,7 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 		wnd.endFrame(ptrCmdList);
 		ctx.execute();
 		if (!wnd.present()) {
+			GetLogger().log("Frame presentation failed!");
 			return -1;
 		}
 	}

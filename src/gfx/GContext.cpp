@@ -2,13 +2,19 @@
 #include "GContext.h"
 
 GContext::GContext() {
+    HRESULT hr;
+
     // Create device
-    if (FAILED(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to())))) {
+    if (FAILED(hr = D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to())))) {
+        GetLogger().log("D3D12CreateDevice(...) failed!").log(hr);
         return;
     }
 
     // Create fence
-    m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.to()));
+    if (FAILED(hr = m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_fence.to())))) {
+        GetLogger().log("m_device->CreateFence(...) failed!").log(hr);
+        return;
+    }
 
     // Desribe queue
     D3D12_COMMAND_QUEUE_DESC qd;
@@ -19,23 +25,26 @@ GContext::GContext() {
     qd.NodeMask = NULL;
     
     // Create queue
-    if (FAILED(m_device->CreateCommandQueue(&qd, IID_PPV_ARGS(m_queue.to())))) {
-            return;
+    if (FAILED(hr = m_device->CreateCommandQueue(&qd, IID_PPV_ARGS(m_queue.to())))) {
+        GetLogger().log("m_device->CreateCommandQueue(...) failed!").log(hr);
+        return;
     }
 
     // create allocator
-    if (FAILED(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(m_allocator.to())))) {
+    if (FAILED(hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(m_allocator.to())))) {
+        GetLogger().log("m_device->CreateCommandAllocator(...) failed!").log(hr);
         return;
     }
 
     // Create list
-    if (FAILED(m_device->CreateCommandList(NULL, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator, NULL, IID_PPV_ARGS(m_cmdList.to())))) {
+    if (FAILED(hr = m_device->CreateCommandList(NULL, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator, NULL, IID_PPV_ARGS(m_cmdList.to())))) {
+        GetLogger().log("m_device->CreateCommandList(...) failed!").log(hr);
         return;
     }
 }
 
 GContext::~GContext() {
-    // Make shure to execute
+    // Make sure to execute
     execute();
     flush();
 

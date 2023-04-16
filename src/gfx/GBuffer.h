@@ -31,7 +31,11 @@ class GBuffer {
 				rd.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 				// Create resource
-				ptrDevice->CreatePlacedResource(heap.getHeap(), heapOffset, &rd, state, NULL, IID_PPV_ARGS(m_ptrGpu.to()));
+				HRESULT hr;
+				if (FAILED(hr = ptrDevice->CreatePlacedResource(heap.getHeap(), heapOffset, &rd, state, NULL, IID_PPV_ARGS(m_ptrGpu.to())))) {
+					GetLogger().log("ptrDevice->CreatePlacedResource(...) failed!").log(hr);
+					return;
+				}
 			}
 		}
 

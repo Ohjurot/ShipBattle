@@ -26,9 +26,12 @@ size_t XAudioBuffer::size() {
 }
 
 XAudioBuffer XAudioLoader::loadFromFile(LPCWSTR file) {
-	// Open File
+    HRESULT hr;
+    
+    // Open File
     HANDLE hFile = CreateFile(file, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
+        GetLogger().log("Failed to open audio file!");
         return XAudioBuffer();
     }
 
@@ -38,11 +41,18 @@ XAudioBuffer XAudioLoader::loadFromFile(LPCWSTR file) {
     DWORD filetype;
 
     // Find and read chunk
-    findChunk(hFile, fourccRIFF, dwChunkSize, dwChunkPosition);
-    readChunkData(hFile, &filetype, sizeof(DWORD), dwChunkPosition);
+    if (FAILED(hr = findChunk(hFile, fourccRIFF, dwChunkSize, dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"findChunk\" for \"fourccRIFF\"").log(hr);
+        return XAudioBuffer();
+    }
+    if (FAILED(hr = readChunkData(hFile, &filetype, sizeof(DWORD), dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"readChunkData\" for \"fourccRIFF\"").log(hr);
+        return XAudioBuffer();
+    }
 
     // Check if type match
     if (filetype != fourccWAVE) {
+        GetLogger().log("Audio loading failed! Not a wav file!");
         return XAudioBuffer();
     }
 
@@ -51,17 +61,29 @@ XAudioBuffer XAudioLoader::loadFromFile(LPCWSTR file) {
     ZeroMemory(&waveHeader, sizeof(WAVEFORMATEXTENSIBLE));
 
     // Find format chunk and load data
-    findChunk(hFile, fourccFMT, dwChunkSize, dwChunkPosition);
-    readChunkData(hFile, &waveHeader, dwChunkSize, dwChunkPosition);
+    if (FAILED(hr = findChunk(hFile, fourccFMT, dwChunkSize, dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"findChunk\" for \"fourccFMT\"").log(hr);
+        return XAudioBuffer();
+    }
+    if (FAILED(hr = readChunkData(hFile, &waveHeader, dwChunkSize, dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"readChunkData\" for \"fourccFMT\"").log(hr);
+        return XAudioBuffer();
+    }
 
     // Find data chunk
-    findChunk(hFile, fourccDATA, dwChunkSize, dwChunkPosition);
+    if (FAILED(hr = findChunk(hFile, fourccDATA, dwChunkSize, dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"findChunk\" for \"fourccDATA\"").log(hr);
+        return XAudioBuffer();
+    }
 
     // Allocate memory for chunk
     void* ptrBuffer = malloc(dwChunkSize);
     
     // Read chunk content
-    readChunkData(hFile, ptrBuffer, dwChunkSize, dwChunkPosition);
+    if (FAILED(hr = readChunkData(hFile, ptrBuffer, dwChunkSize, dwChunkPosition))) {
+        GetLogger().log("Audio loading failed at \"readChunkData\" for \"fourccDATA\"").log(hr);
+        return XAudioBuffer();
+    }
 
     // Return buffer
     return XAudioBuffer(ptrBuffer, dwChunkSize, waveHeader);
