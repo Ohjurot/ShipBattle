@@ -54,8 +54,8 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	ShowWindow((HWND)wnd, SW_MAXIMIZE);
 
 	// Heaps
-	GHeap gpuHeap(ctx.getDevice(), D3D12_HEAP_TYPE_DEFAULT, 1024 * 1024 * 128);
-	GHeap uploadHeap(ctx.getDevice(), D3D12_HEAP_TYPE_UPLOAD, 1024 * 1024 * 128);
+	GHeap gpuHeap(ctx.getDevice(), D3D12_HEAP_TYPE_DEFAULT, 1024 * 1024 * 32);
+	GHeap uploadHeap(ctx.getDevice(), D3D12_HEAP_TYPE_UPLOAD, 1024 * 1024 * 64);
 
 	// Upload buffer
 	GBuffer<BYTE, 1024 * 1024 * 32> uploadBuffer(ctx.getDevice(), uploadHeap);

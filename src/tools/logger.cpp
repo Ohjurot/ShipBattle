@@ -13,16 +13,28 @@ Logger::Logger()
     std::stringstream ss;
     ss << appdatapath << "\\ShipBattle\\" << std::put_time(&time, "%d_%m_%Y-%H_%M_%S") << ".log";
 
-    std::filesystem::path path = ss.str();
-    std::filesystem::path dir = path;
+    m_logpath = ss.str();
+    std::filesystem::path dir = m_logpath;
     dir.remove_filename();
     
     std::filesystem::create_directories(dir);
-    m_logfile.open(path, std::ios::out);
+    m_logfile.open(m_logpath, std::ios::out);
+}
+
+Logger::~Logger()
+{
+    m_logfile.close();
+
+    if (!m_shouldKeep)
+    {
+        std::filesystem::remove(m_logpath);
+    }
 }
 
 Logger& Logger::log(std::string_view text)
 {
+    m_shouldKeep = true;
+
     m_logfile << text << std::endl;
     m_logfile.flush();
     return *this;

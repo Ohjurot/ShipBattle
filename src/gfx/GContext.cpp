@@ -4,8 +4,22 @@
 GContext::GContext() {
     HRESULT hr;
 
+    // Get factory
+    ScopedComPointer<IDXGIFactory7> factory;
+    if (FAILED(hr = CreateDXGIFactory2(0, IID_PPV_ARGS(factory.to())))) {
+        GetLogger().log("CreateDXGIFactory2(...) failed!").log(hr);
+        return;
+    }
+
+    // Get most performant adapter
+    ScopedComPointer<IDXGIAdapter4> adapter;
+    if (FAILED(hr = factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(adapter.to())))) {
+        GetLogger().log("factory->EnumAdapterByGpuPreference(...) failed!").log(hr);
+        return;
+    }
+
     // Create device
-    if (FAILED(hr = D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to())))) {
+    if (FAILED(hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to())))) {
         GetLogger().log("D3D12CreateDevice(...) failed!").log(hr);
         return;
     }

@@ -14,10 +14,13 @@ class Logger
 {
     public:
         Logger();
+        ~Logger();
 
         Logger& log(std::string_view text);
         Logger& log(HRESULT hr);
 
     private:
         std::fstream m_logfile;
+        std::filesystem::path m_logpath;
+        bool m_shouldKeep = false;
 };
