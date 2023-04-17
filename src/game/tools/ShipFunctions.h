@@ -15,4 +15,6 @@ class ShipFunctions {
 		static void randomShips(Ship* arrShips, unsigned int count);
 		static void drawShip(Ship* ship, QuadManger& manager);
 		static void drawShips(Ship* arrShips, unsigned int count, QuadManger& manager);
+
+		static bool shipIntersect(Ship* s1, Ship* s2);
 };

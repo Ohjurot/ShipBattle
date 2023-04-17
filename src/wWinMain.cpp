@@ -45,12 +45,13 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	GContext ctx;
 	
 	// Window
-	EasyHWND::WindowClass cls(L"ShipBattle_WND", CS_OWNDC);
+	EasyHWND::WindowClass cls(L"ShipBattle_WND", CS_OWNDC, LoadIcon(NULL, IDI_APPLICATION), LoadCursor(NULL, IDC_ARROW));
 	GWindow wnd(cls, ctx.getDevice(), ctx.getQueue());
 	wnd.setWindowVisibility(true);
 
 	// Maximize
 	ShowWindow((HWND)wnd, SW_MAXIMIZE);
+	wnd.setFullscreen(true);
 
 	// Upload buffer
 	GBuffer<BYTE, 1024 * 1024 * 32> uploadBuffer(ctx.getDevice(), D3D12_HEAP_TYPE_UPLOAD);

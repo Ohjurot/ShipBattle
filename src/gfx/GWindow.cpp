@@ -2,7 +2,7 @@
 #include "GWindow.h"
 
 GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12CommandQueue* ptrQueue)
-	: EasyHWND::Window(wClass, L"Ship Battle V1.0 © Copyright 2021 by Ludwig Füchsl", 100, 100, 960, 540, WS_OVERLAPPEDWINDOW, WS_EX_OVERLAPPEDWINDOW),
+	: EasyHWND::Window(wClass, L"Ship Battle V1.1", 100, 100, 960, 540, WS_OVERLAPPEDWINDOW, WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW),
 	m_iostate({})
 {
 	HRESULT hr;
@@ -114,6 +114,9 @@ bool GWindow::handleWindowMessage(LRESULT* ptrLRESULT, HWND hwnd, UINT msg, WPAR
 			// Check enter
 			if (wParam == VK_RETURN) {
 				m_iostate.enterIsDown = TRUE;
+			}
+			else if (wParam == VK_F11) {
+				setFullscreen(!m_fullscreen);
 			}
 			break;
 		}
@@ -240,6 +243,43 @@ bool GWindow::present() {
 
 GameIOState GWindow::getCurrentIOState() {
 	return m_iostate;
+}
+
+void GWindow::setFullscreen(bool fullscreen)
+{
+	// New styles
+	DWORD style = WS_OVERLAPPEDWINDOW | WS_VISIBLE, exStyle = WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW;
+	if (fullscreen)
+	{
+		style = WS_POPUP | WS_VISIBLE;
+		exStyle = WS_EX_APPWINDOW;
+	}
+
+	// Update style
+	SetWindowLong((HWND)*this, GWL_STYLE, (LONG)style);
+	SetWindowLong((HWND)*this, GWL_EXSTYLE, (LONG)exStyle);
+
+	// Update bounds
+	if (fullscreen)
+	{
+		auto monitor = MonitorFromWindow((HWND)*this, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO info{};
+		info.cbSize = sizeof(MONITORINFO);
+		if (GetMonitorInfo(monitor, &info))
+		{
+			AdjustWindowRectEx(&info.rcMonitor, style, false, exStyle);
+			SetWindowPos((HWND)*this, nullptr, info.rcMonitor.left, info.rcMonitor.top, info.rcMonitor.right - info.rcMonitor.left, info.rcMonitor.bottom - info.rcMonitor.top, SWP_NOZORDER);
+		}
+	}
+	else
+	{
+		ShowWindow((HWND)*this, SW_MAXIMIZE);
+	}
+
+	// Update window
+	UpdateWindow((HWND)*this);
+
+	m_fullscreen = fullscreen;
 }
 
 void GWindow::createDepthBuffer(ID3D12Device* device)

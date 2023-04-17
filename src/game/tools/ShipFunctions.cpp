@@ -3,10 +3,10 @@
 
 bool ShipFunctions::shipCheckBounds(Ship* ptrShip) {
     if (ptrShip->isVertical) {
-        return ((ptrShip->posy + ptrShip->length) < 10);
+        return ((ptrShip->posy + ptrShip->length) <= 10);
     }
     else {
-        return ((ptrShip->posx + ptrShip->length) < 10);
+        return ((ptrShip->posx + ptrShip->length) <= 10);
     }
 }
 
@@ -45,35 +45,8 @@ bool ShipFunctions::shipCheckCollision(Ship* arrShips, Ship* checker, unsigned i
         Ship* otherShip = &arrShips[i];
 
         // Only for other ships
-        if (i != index) {
-            // Overlap [Vertical | Vertical]
-            if (otherShip->isVertical && placeShip->isVertical &&
-                otherShip->posx == placeShip->posx &&
-                ((placeShip->posy + placeShip->length >= otherShip->posy) || (otherShip->posy + otherShip->length >= placeShip->posy))
-                ) {
-                return false;
-            }
-            // Overlap [Horizontal | Horizontal]
-            if (!otherShip->isVertical && !placeShip->isVertical &&
-                otherShip->posy == placeShip->posy &&
-                ((placeShip->posx + placeShip->length >= otherShip->posx) || (otherShip->posx + otherShip->length >= placeShip->posx))
-                ) {
-                return false;
-            }
-            // Crossing other Vertical
-            if (otherShip->isVertical &&
-                ((placeShip->posx <= otherShip->posx) && ((placeShip->posx + placeShip->length) >= otherShip->posx)) &&
-                ((otherShip->posy <= placeShip->posy) && ((otherShip->posy + otherShip->length) >= placeShip->posy))
-                ) {
-                return false;
-            }
-            // Crossing this Vertical
-            if (placeShip->isVertical &&
-                ((otherShip->posx <= placeShip->posx) && ((otherShip->posx + otherShip->length) >= placeShip->posx)) &&
-                ((placeShip->posy <= otherShip->posy) && ((placeShip->posy + placeShip->length) >= otherShip->posy))
-                ) {
-                return false;
-            }
+        if (i != index && shipIntersect(placeShip, otherShip)) {
+            return false;
         }
     }
 
@@ -149,4 +122,35 @@ void ShipFunctions::drawShips(Ship* arrShips, unsigned int count, QuadManger& ma
             drawShip(&arrShips[i], manager);
         }
     }
+}
+
+bool ShipFunctions::shipIntersect(Ship* s1, Ship* s2)
+{
+    // Line 1
+    int l1x1 = s1->posx;
+    int l1y1 = s1->posy;
+    int l1x2 = s1->isVertical ? l1x1 : s1->posx + s1->length - 1;
+    int l1y2 = s1->isVertical ? s1->posy + s1->length - 1 : l1y1;
+
+    // Line 2
+    int l2x1 = s2->posx;
+    int l2y1 = s2->posy;
+    int l2x2 = s2->isVertical ? l2x1 : s2->posx + s2->length - 1;
+    int l2y2 = s2->isVertical ? s2->posy + s2->length - 1 : l2y1;
+
+    /*
+    *  Intersection test seen as AABB
+    * 
+    *  cs  yo              Conditions (or):   
+    *  xo  a ------ o      1) b2 > a1 
+    *      |   s1   |      2) a2 > b1
+    *      |        |   
+    *      o ------ b  xo
+    *              yo  cs
+    */
+
+    //  cs                              xo                              yo
+    if ((l2x2 < l1x1 && l2y2 < l1y1) || (l2x1 < l1x1 && l2x2 < l1x1) || (l2y1 < l1y1 && l2y2 < l1y1)) return false;
+    if ((l2x1 > l1x2 && l2y1 > l1y2) || (l2x1 > l1x2 && l2x2 > l1x2) || (l2y1 > l1y2 && l2y2 > l1y2)) return false;
+    return true;
 }

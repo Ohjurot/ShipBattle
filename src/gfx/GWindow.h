@@ -22,6 +22,8 @@ class GWindow : public EasyHWND::Window{
 		inline int getWidth() const { return m_width;  }
 		inline int getHeight() const { return m_height;  }
 
+		void setFullscreen(bool fullscreen);
+
 	private:
 		void createDepthBuffer(ID3D12Device* device);
 		void destroyDepthBuffer();
@@ -33,6 +35,7 @@ class GWindow : public EasyHWND::Window{
 		GameIOState m_iostate;
 
 		bool m_needsResize = false;
+		bool m_fullscreen = false;
 
 		unsigned int m_heapIncrement = 0;
 
