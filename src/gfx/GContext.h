@@ -1,6 +1,9 @@
 #pragma once
 #include "pch.h"
 
+#include <string>
+#include <sstream>
+
 class GContext {
 	public:
 		GContext();

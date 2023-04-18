@@ -20,8 +20,31 @@ GContext::GContext() {
 
     // Create device
     if (FAILED(hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to())))) {
-        GetLogger().log("D3D12CreateDevice(...) failed!").log(hr);
-        return;
+        GetLogger().log("D3D12CreateDevice(...) failed!").log(hr).log("Using WARP adapter!");
+        
+        DXGI_ADAPTER_DESC3 ad{};
+        adapter->GetDesc3(&ad);
+
+        // Try warp adapter
+        if (FAILED(hr = factory->EnumWarpAdapter(IID_PPV_ARGS(adapter.to()))))
+        {
+            GetLogger().log("factory->EnumWarpAdapter(...) failed!").log(hr);
+            return;
+        }
+
+        // Final try
+        if (FAILED(hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_device.to()))))
+        {
+            GetLogger().log("D3D12CreateDevice(...) failed!").log(hr);
+            return;
+        }
+
+        // Complain to the user
+        std::wstringstream wss;
+        wss << "The game failed to activate your GPU \"" << ad.Description << "\"" << std::endl
+            << "Please make sure you have a gpu with DirectX 12 support (And feature level 11.0) installed!" << std::endl
+            << "Using the Microsoft Software renderer! Bad performance is expected!";
+        MessageBoxW(nullptr, wss.str().c_str(), L"D3D12CreateDevice(...) failed!", MB_OK | MB_ICONERROR);
     }
 
     // Create fence
