@@ -8,14 +8,14 @@ A Ship Battle game created in a weekend speed coding challenge using WinAPI, Dir
 ## Requirements
 
 - OS: Windows 10 64-Bit 
-- vcredists 2019
+- vcredists 2022
 - Disk Space (HDD / SSD): 256 MB
 - CPU: 4-Core
 - Sound Card: XAudio2 compatible
-- GPU: DirectX 12 compatible 
+- GPU: DirectX 12 compatible (Feature level 11.0)
 - CPU Memory: 1GB
 - GPU Memory: 512 MB
-- Display: At least FHD (1920 * 1080)
+- Display: FullHD recommended (1920 * 1080)
 
 ## How to play
 
