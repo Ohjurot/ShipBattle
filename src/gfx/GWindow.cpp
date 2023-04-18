@@ -2,7 +2,7 @@
 #include "GWindow.h"
 
 GWindow::GWindow(EasyHWND::WindowClass& wClass, ID3D12Device* ptrDevice, ID3D12CommandQueue* ptrQueue)
-	: EasyHWND::Window(wClass, L"Ship Battle V1.1", 100, 100, 960, 540, WS_OVERLAPPEDWINDOW, WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW),
+	: EasyHWND::Window(wClass, L"Ship Battle V1.2", 100, 100, 960, 540, WS_OVERLAPPEDWINDOW, WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW),
 	m_iostate({})
 {
 	HRESULT hr;
