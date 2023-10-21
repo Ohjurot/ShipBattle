@@ -20,52 +20,64 @@ AudioVoice::AudioVoice(IXAudio2* ptrAudio, LPCWSTR file) :
 }
 
 AudioVoice::~AudioVoice(){
-	m_ptrVoice->DestroyVoice();
+	if (m_ptrVoice)
+	{
+		m_ptrVoice->DestroyVoice();
+	}
 }
 
 void AudioVoice::play(bool loop){	
 	HRESULT hr;
 
-	// Create buffer
-	XAUDIO2_BUFFER buffer;
-	ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
+	if (m_ptrVoice)
+	{
+        // Create buffer
+        XAUDIO2_BUFFER buffer;
+        ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
 
-	// Default buffer desription
-	buffer.AudioBytes = m_buffer.size();
-	buffer.pAudioData = (BYTE*)m_buffer.ptr();
-	buffer.Flags = XAUDIO2_END_OF_STREAM;
-	
-	// Buffer looping
-	if (loop) {
-		buffer.LoopBegin = 0;
-		buffer.LoopLength = 0;
-		buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-	}
+        // Default buffer desription
+        buffer.AudioBytes = m_buffer.size();
+        buffer.pAudioData = (BYTE*)m_buffer.ptr();
+        buffer.Flags = XAUDIO2_END_OF_STREAM;
 
-	// Submit buffer and play
-	if (FAILED(hr = m_ptrVoice->SubmitSourceBuffer(&buffer))) {
-		GetLogger().log("m_ptrVoice->SubmitSourceBuffer(...) failed!").log(hr);
-		return;
+        // Buffer looping
+        if (loop) {
+            buffer.LoopBegin = 0;
+            buffer.LoopLength = 0;
+            buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+        }
+
+        // Submit buffer and play
+        if (FAILED(hr = m_ptrVoice->SubmitSourceBuffer(&buffer))) {
+            GetLogger().log("m_ptrVoice->SubmitSourceBuffer(...) failed!").log(hr);
+            return;
+        }
+        m_ptrVoice->Start();
 	}
-	m_ptrVoice->Start();
 }
 
 void AudioVoice::stop(){
 	HRESULT hr;
 
 	// stop
-	if (FAILED(hr = m_ptrVoice->Stop())) {
-        GetLogger().log("m_ptrVoice->Stop(...) failed!").log(hr);
-        return;
+	if (m_ptrVoice)
+	{
+        if (FAILED(hr = m_ptrVoice->Stop())) {
+            GetLogger().log("m_ptrVoice->Stop(...) failed!").log(hr);
+            return;
+        }
 	}
 }
 
 void AudioVoice::setVolume(float vol) {
 	HRESULT hr;
 
-	// Set volume
-	if (FAILED(hr = m_ptrVoice->SetVolume(vol))) {
-        GetLogger().log("m_ptrVoice->SetVolume(...) failed!").log(hr);
-        return;
+	if (m_ptrVoice)
+	{
+        // Set volume
+        if (FAILED(hr = m_ptrVoice->SetVolume(vol))) {
+            GetLogger().log("m_ptrVoice->SetVolume(...) failed!").log(hr);
+            return;
+        }
 	}
 }

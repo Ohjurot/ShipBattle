@@ -19,7 +19,10 @@ AudioClient::AudioClient(){
 
 AudioClient::~AudioClient(){
 	// Destroy release
-	m_masterVoice->DestroyVoice();
+	if (m_masterVoice)
+	{
+		m_masterVoice->DestroyVoice();
+	}
 	m_xa2.release();
 }
 
@@ -30,8 +33,11 @@ IXAudio2* AudioClient::getAudio(){
 void AudioClient::setVolume(float vol) {
 	HRESULT hr;
 
-	if (FAILED(hr = m_masterVoice->SetVolume(vol))) {
-		GetLogger().log("m_masterVoice->SetVolume(...) failed!").log(hr);
-		return;
+	if (m_masterVoice)
+	{
+        if (FAILED(hr = m_masterVoice->SetVolume(vol))) {
+            GetLogger().log("m_masterVoice->SetVolume(...) failed!").log(hr);
+            return;
+        }
 	}
 }
