@@ -1,0 +1,29 @@
+dependencies:
+  # Slang shader compiler (https://shader-slang.org/) - prebuilt Windows x86_64 package
+  - download: https://github.com/shader-slang/slang/releases/download/v2026.22/slang-2026.22-windows-x86_64.zip
+    folder: dependencies/slang
+    all_x86_64:
+      include_dirs:
+        - include
+      lib_dirs:
+        - lib
+      links:
+        - slang
+      copy_dll:
+        - bin/slang.dll
+        - bin/slang-compiler.dll
+
+  # DirectX Shader Compiler - loaded by Slang as downstream compiler for DXIL output,
+  # also usable directly via <dxcapi.h>
+  - download: https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.9.2609/dxc_2026_09_29.zip
+    folder: dependencies/dxc
+    all_x86_64:
+      include_dirs:
+        - inc
+      lib_dirs:
+        - lib/x64
+      links:
+        - dxcompiler
+      copy_dll:
+        - bin/x64/dxcompiler.dll
+        - bin/x64/dxil.dll

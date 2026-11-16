@@ -194,6 +194,13 @@ moxpp_dependencies_link(conf, is_debug)   -- applies libdirs + links, gated by c
 ```
 Call them from `cmox_function_setupproject()` in `mox.lua`, or directly inside a project's `build.lua` after `mox_cpp()` / `mox_console()` / etc.
 
+**Currently configured external dependencies:**
+
+| Dependency | Version | Source | Notes |
+|------------|---------|--------|-------|
+| [Slang](https://shader-slang.org/) | 2026.22 | Prebuilt `slang-2026.22-windows-x86_64.zip` from GitHub releases, extracted to `./dependencies/slang` | x86_64 only. Links `slang.lib`; ships `slang.dll` + `slang-compiler.dll`. Licenses registered in `./licenses.yml`. |
+| [DirectX Shader Compiler](https://github.com/microsoft/DirectXShaderCompiler) | 1.9.2609 | Prebuilt `dxc_2026_09_29.zip` from GitHub releases, extracted to `./dependencies/dxc` | x86_64 only. Adds `inc/` (`<dxcapi.h>`), links `dxcompiler.lib`. Ships `dxcompiler.dll` + `dxil.dll`, which Slang loads to emit DXIL. Licenses registered in `./licenses.yml`. |
+
 ### License Report: `generate_licenses` / `licenses.yml`
 
 `scripts/generate_licenses.py` is run automatically at the end of `mox init`. It collects:

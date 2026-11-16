@@ -182,7 +182,7 @@ if __name__ == '__main__':
         # Uncomment this if you dont need a disclaimer or write your own:
         # "--disclaimer", "",
         # You can add a custom "./license.yml" file to describe non conan licenses (see scripts\generate_licenses.py for the file format)
-        # "--additional-licenses", "./licenses.yml",
+        "--additional-licenses", "./licenses.yml",
         # Change this to output to a different file 
         # "--output", "./LICENSE.html", 
     ))

@@ -1,0 +1,18 @@
+additional_licenses:
+  # Slang shader compiler (prebuilt package, see dependencies.yml)
+  - name: slang
+    version: "2026.22"
+    license_files:
+      - "./dependencies/slang/LICENSE"
+      # Full texts of the licenses referenced by Slang's LICENSE (Apache-2.0 WITH LLVM-exception)
+      - "./dependencies/slang/LICENSES/Apache-2.0.txt"
+      - "./dependencies/slang/LICENSES/LLVM-exception.txt"
+      # Notices of the third-party code bundled with the Slang binaries
+      - "./dependencies/slang/third-party-notices/*"
+
+  # DirectX Shader Compiler (prebuilt package, see dependencies.yml)
+  - name: DirectXShaderCompiler
+    version: "1.9.2609"
+    license_files:
+      # Matches LICENSE-LLVM.txt, LICENSE-MS.txt and LICENCE-MIT.txt (spelled that way in the package)
+      - "./dependencies/dxc/LICEN*"
