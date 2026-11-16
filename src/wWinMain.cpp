@@ -6,6 +6,7 @@
 #include <gfx/GTexture.h>
 #include <gfx/GDescHeap.h>
 #include <gfx/GShader.h>
+#include <gfx/GShaderCompiler.h>
 #include <gfx/GRootSignature.h>
 
 #include <rendering/RenderState.h>
@@ -87,10 +88,15 @@ INT WINAPI wWinMain(HINSTANCE _In_ hInstance, HINSTANCE _In_opt_ hPrevInstance, 
 	statGameWin.createSrv(ctx.getDevice(), handleTex.getIncrement());
 	statGameLost.createSrv(ctx.getDevice(), handleTex.getIncrement());
 
+	// Compile shaders (writes the .cso files loaded below)
+	if (!CompileShaders(L"./shaders")) {
+		GetLogger().log("Shader compilation failed! Using existing shader binaries.");
+	}
+
 	// Load shaders
-	GShader rootSignatureShader(L"./shader/RootSignature.cso");
-	GShader vertexShader(L"./shader/ImageQuadVS.cso");
-	GShader pixelShader(L"./shader/ImageQuadPS.cso");
+	GShader rootSignatureShader(L"./shaders/RootSignature.cso");
+	GShader vertexShader(L"./shaders/ImageQuadVS.cso");
+	GShader pixelShader(L"./shaders/ImageQuadPS.cso");
 
 	// Create root signature and pso
 	GRootSignature rootSignature(ctx.getDevice(), rootSignatureShader.ptr(), rootSignatureShader.size());
