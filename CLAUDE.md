@@ -185,6 +185,8 @@ dependencies:
 | `debug` / `debug_<arch>` | `./dlls/Debug-<arch>/` only |
 | `release` / `release_<arch>` | `./dlls/Release-<arch>/` only |
 
+A `copy_dll` entry may also be a mapping `{ file: <path>, to: <subdir> }`, which places the file into `./dlls/<Conf>-<arch>/<subdir>/` instead of the root (local extension of the template script, used for the Agility SDK). The script also treats `.nupkg` downloads as zip archives (local extension as well).
+
 **`folder_copy`** — list of directory paths relative to `folder`; each directory is recursively copied into `./dlls/<Conf>-<arch>/` preserving the full hierarchy under the source folder's own name. Same section-to-destination mapping as `copy_dll`. Use for assets, shaders, or any multi-file tree that must keep its internal structure.
 
 **Generated output** — `./dependencies/dependencies.lua` is included automatically by `scripts/premake5.lua` and exposes two functions:
@@ -199,6 +201,7 @@ Call them from `cmox_function_setupproject()` in `mox.lua`, or directly inside a
 | Dependency | Version | Source | Notes |
 |------------|---------|--------|-------|
 | [Slang](https://shader-slang.org/) | 2026.22 | Prebuilt `slang-2026.22-windows-x86_64.zip` from GitHub releases, extracted to `./dependencies/slang` | x86_64 only. Links `slang.lib`; ships `slang.dll` + `slang-compiler.dll`. Licenses registered in `./licenses.yml`. |
+| [DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/) | 1.620.2 | NuGet package `Microsoft.Direct3D.D3D12`, downloaded as `.nupkg` and extracted to `./dependencies/agility` | x86_64 only. Adds `build/native/include` (overrides the Windows SDK `d3d12.h`). Ships `D3D12/D3D12Core.dll` (+ `D3D12/d3d12SDKLayers.dll` in Debug). SDK version/path exports live in `src/gfx/AgilitySDK.cpp`. Licenses registered in `./licenses.yml`. |
 | [DirectX Shader Compiler](https://github.com/microsoft/DirectXShaderCompiler) | 1.9.2609 | Prebuilt `dxc_2026_09_29.zip` from GitHub releases, extracted to `./dependencies/dxc` | x86_64 only. Adds `inc/` (`<dxcapi.h>`), links `dxcompiler.lib`. Ships `dxcompiler.dll` + `dxil.dll`, which Slang loads to emit DXIL. Licenses registered in `./licenses.yml`. |
 
 ### License Report: `generate_licenses` / `licenses.yml`

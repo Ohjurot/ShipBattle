@@ -78,7 +78,8 @@ def _extract_tar(path, dest, mode):
 
 _EXTRACTORS = {
     '.zip':     lambda p, d: zipfile.ZipFile(p).extractall(d),
-    '.tar.gz':  lambda p, d: _extract_tar(p, d, 'r:gz'),
+    '.nupkg':   lambda p, d: zipfile.ZipFile(p).extractall(d),  # NuGet packages are plain zip archives
+    '.tar.gz': lambda p, d: _extract_tar(p, d, 'r:gz'),
     '.tgz':     lambda p, d: _extract_tar(p, d, 'r:gz'),
     '.tar.bz2': lambda p, d: _extract_tar(p, d, 'r:bz2'),
     '.tar.xz':  lambda p, d: _extract_tar(p, d, 'r:xz'),
@@ -88,7 +89,7 @@ _EXTRACTORS = {
 
 def _archive_suffix(url):
     url_lower = url.lower()
-    for suffix in ('.tar.gz', '.tar.bz2', '.tar.xz', '.tgz', '.zip', '.tar'):
+    for suffix in ('.tar.gz', '.tar.bz2', '.tar.xz', '.tgz', '.zip', '.nupkg', '.tar'):
         if url_lower.endswith(suffix):
             return suffix
     return None
@@ -170,15 +171,21 @@ def _copy_dlls(dep, premake_arch):
     for section_name, confs in section_to_confs.items():
         section = dep.get(section_name) or {}
 
-        # Flat file copy (filename only, no subdirectory)
-        for dll_rel in section.get('copy_dll') or []:
+        # Flat file copy (filename only, no subdirectory).
+        # An entry is either a path string, or a mapping { file: <path>, to: <subdir> }
+        # that places the file into ./dlls/<Conf>-<arch>/<subdir>/ instead.
+        for entry in section.get('copy_dll') or []:
+            if isinstance(entry, dict):
+                dll_rel, subdir = entry['file'], entry.get('to') or ''
+            else:
+                dll_rel, subdir = entry, ''
             src = os.path.join(folder, dll_rel)
             if not os.path.isfile(src):
                 print(f'  Warning: DLL not found: {src}')
                 continue
             filename = os.path.basename(dll_rel)
             for conf in confs:
-                dst_dir = f'./dlls/{conf}-{premake_arch}'
+                dst_dir = os.path.join(f'./dlls/{conf}-{premake_arch}', subdir)
                 os.makedirs(dst_dir, exist_ok=True)
                 dst = os.path.join(dst_dir, filename)
                 print(f'  Copying {src} -> {dst}')

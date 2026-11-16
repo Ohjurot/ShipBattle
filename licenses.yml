@@ -16,3 +16,10 @@ additional_licenses:
     license_files:
       # Matches LICENSE-LLVM.txt, LICENSE-MS.txt and LICENCE-MIT.txt (spelled that way in the package)
       - "./dependencies/dxc/LICEN*"
+
+  # DirectX 12 Agility SDK (NuGet package, see dependencies.yml)
+  - name: Microsoft.Direct3D.D3D12 (DirectX 12 Agility SDK)
+    version: "1.620.2"
+    license_files:
+      # LICENSE.txt (binaries) and LICENSE-CODE.txt (headers)
+      - "./dependencies/agility/LICENSE*.txt"

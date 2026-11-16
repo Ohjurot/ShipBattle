@@ -27,3 +27,18 @@ dependencies:
       copy_dll:
         - bin/x64/dxcompiler.dll
         - bin/x64/dxil.dll
+
+  # DirectX 12 Agility SDK (NuGet package Microsoft.Direct3D.D3D12, fetched as plain archive)
+  # The runtime DLLs go into the D3D12/ subfolder next to the exe; that folder and the SDK
+  # version are announced to the D3D12 loader in src/gfx/AgilitySDK.cpp - update both together.
+  - download: https://api.nuget.org/v3-flatcontainer/microsoft.direct3d.d3d12/1.620.2/microsoft.direct3d.d3d12.1.620.2.nupkg
+    folder: dependencies/agility
+    all_x86_64:
+      include_dirs:
+        - build/native/include
+      copy_dll:
+        - file: build/native/bin/x64/D3D12Core.dll
+    # Debug layer, only needed (and only requested) in Debug builds
+    debug_x86_64:
+      copy_dll:
+        - file: build/native/bin/x64/d3d12SDKLayers.dll
