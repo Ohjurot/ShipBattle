@@ -1,0 +1,80 @@
+# Building the project
+This project supports building on
+| OS          | x86                | x86_64             | ARM                | ARM64              |
+| ----------- | ------------------ | ------------------ | ------------------ | ------------------ |
+| **Windows** | :white_check_mark: | :white_check_mark: | :x:                | :white_check_mark: |
+| **Linux**   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| **MacOS**   | :x:                | :x:                | :x:                | :white_check_mark: |
+
+## Requirements
+- Python3 with venv (On linux `python3` and `python3-venv`)
+- Visual Studio with the C++ workloads (Windows)
+- Package `build-essential` (Linux only) 
+- GLIBC_2.38 or more recent (Linux; Premake requirement)
+- CMake (Required for some conan packages, but not for the template)
+
+## Windows
+### Setting up the project
+To create the visual studio solution and projects run the following commands in the root of the repository
+```bat
+mox.bat init
+```
+*This will also download and compile all external dependencies. Please be patient.*
+
+### Writing code and compiling
+After setting up the project, you will find a `.sln` file in the root directory. Open this file with Visual Studio and start developing/compiling.
+
+## Linux
+### Writing code and compiling
+On linux you can directly start editing the code without any solution. Use the text editor of your choice.
+
+As soon as you are ready to build run the following commands
+```sh
+# It's recommended to run init after the first clone and after creating / moving / deleting files.
+./mox.sh init
+# This is the raw linux "make". You can add the configuration as an argument
+./mox.sh build
+./mox.sh build --conf Debug
+# This is how you can run the compiled application in the proper way from the repository root
+./mox.sh run EXECUTABLE_NAME
+# Optional with the configuration
+./mox.sh run --conf Debug EXECUTABLE_NAME
+```
+The above commands also fully work on windows (use `mox` or `mox.bat` instead of `./mox.sh`).
+
+## MacOS
+### Setting up the project
+To create the xcode projects run the following command in the root of the repository
+```sh
+./mox.sh init
+```
+*This will also download and compile all external dependencies. Please be patient.*
+
+### Writing code and compiling
+After setting up the project, you will find a `.xcworkspace` folder in the root directory. Open this folder with xcode or via finder.
+
+## Releases
+This project is designed to automatically set it's version macro and release all artifacts. This happens via GitHub actions (if not deleted) or via a manual `mox deploy` call. The call expects a environment variable `MOXPP_VERSION` to be set to the current version string (Will be automatically the tag name of the github release when using actions). The first semantic version found inside the variable is used (`v1.2.3` becomes `1.2.3`); if none is found `0.0.0+cci.<date>` is used, without the variable `0.0.0+dev.<date>`. All scripts obtain the version via `mox.GetAppVersion()`. The deploy process can be seen in `/scripts/deploy.py`.
+
+## Actions
+The project provides the following actions. You can run them with the mox tool (`mox` or `mox.bat` on Windows. `./mox.sh` on linux):
+- **init**: This command will initialized the repository. On windows it will generate a solution, on linux Makefiles. Will acquire all external libs via conan (Can be skipped to only run premake5). Usage: `./mox.bat/sh init --conf CONF --arch ARCH --skip_conan`.
+- **build**: This command will build the project. Usage: `./mox.bat/sh build --conf CONF`.
+- **deploy**: This command will deploy a build (zip archives, on Windows an NSIS installer with a portable NSIS bootstrapped into `./dependencies/nsis` on first use, on Debian based Linux a `.deb` package via `dpkg-deb`). Usage: `./mox.bat/sh deploy --conf CONF`.
+- **clean**: This command will remove all regenerateable files of a certain category. Usage `./mox.bat/sh clean [type]` Where type can be (`output`, `project`, `dependencies`, or `all`. Defaults to `output`).
+- **archive**: This command will call git archive to generate a archive file of all committed changes into a dedicated ignored folder with timestamp. Usage `./mox.bat/sh archive` (no arguments supported).
+- **run**: This will automatically run a specific executable in the correct working dir. Usage `./mox.bat/sh run [--conf Debug/Release/...] EXE [args...]`.
+- **autogen**: Will automatically run `init`, `build` and `deploy`.
+- **graph**: Will generate a conan dependency-graph to a HTML file
+- **test**: Will run `init`, `build` (Release by default) and automatically invoke the `unittest` executable. The script will return the return code of the test application. Usage `./mox.bat/sh test [Debug/Release/...]`.
+Please note that `conf` is always indicating your projects configuration (as defined in `mox.lua`). While `arch` is the requested target architecture. If you don't supply arch it uses the native one of your system. Supply a different `arch` to cross-compile for a different CPU architecture.
+
+## Claude Code Integration
+
+MoxPP includes a `CLAUDE.md` file that gives [Claude Code](https://claude.ai/code) context about the build system. Claude Code reads this file automatically, so it understands the MoxPP project structure, `mox.lua` configuration, and `build.lua` API without any extra explanation.
+
+Three skills are available to assist with common tasks:
+
+- **`/moxpp-setup`** — Run once after cloning to configure the template for your project. Updates `mox.lua`, `src/build.lua`, `conanfile.py`, and `CLAUDE.md` based on your project name, architecture choice, and dependencies.
+- **`/moxpp-add-project`** — Adds a new sub-project (executable, library, or utility) to the workspace. Handles directory creation, `build.lua` generation, UUID assignment, and `conanfile.py` updates.
+- **`/moxpp-check`** — Audits `CLAUDE.md` for drift against the actual project structure. Run after any change to `mox.lua`, `conanfile.py`, or `build.lua` files to keep `CLAUDE.md` accurate.

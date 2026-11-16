@@ -1,3 +1,41 @@
-dist
-.vs
-*.exe
+# Python caches and venv
+**__pycache__**
+/venv/venv
+
+# Conan profiles
+/profiles
+
+# Dependency output
+/dependencies
+/dlls
+
+# Build Output
+/build
+/temp
+/deploy
+
+# License output
+/LICENSE.html
+
+# Project archives
+/archive
+
+# Makefile
+**/Makefile
+
+# Visual Studio
+/.vs
+**.sln
+**.slnx
+**.vcxproj
+**.vcxproj.user
+**.vcxproj.filters
+
+# Xcode and macos by products
+**.xcodeproj/
+**.xcworkspace/
+**/.DS_Store
+
+
+# Dependencie graph output
+/dependencies_*.html

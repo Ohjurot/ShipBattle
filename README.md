@@ -1,5 +1,3 @@
-[TOC]
-
 # Ship Battle
 A Ship Battle game created in a weekend speed coding challenge using WinAPI, DirectX 12 and XAudio2
 

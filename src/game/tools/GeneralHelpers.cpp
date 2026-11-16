@@ -1,6 +1,8 @@
 #include "pch.h" 
 #include "GeneralHelpers.h"
 
+#include <optional>
+
 MouseClickBounds GeneralHelpers::evaluateMouse(UINT x, UINT y) {
     // Moude Mounds
     const RECT bounds[] = {
@@ -39,17 +41,16 @@ MouseClickBounds GeneralHelpers::evaluateMouse(UINT x, UINT y) {
 void GeneralHelpers::drawHitMarkers(UINT8 area[10][10], QuadManger& refManager) {
     for (unsigned int x = 0; x < 10; x++) {
         for (unsigned int y = 0; y < 10; y++) {
+            std::optional<TextureQuad> quad;
             switch (area[x][y]) {
                 case 1:
-                    auto qNoHit = EasyTex::textureAt(ET_TEXTURE_NO_HIT, GRID_ORIGINE_LEFT + GRID_STEP_RATE * x, GRID_ORIGINE_TOP + GRID_STEP_RATE * y, 50, GRID_SHIP_SCALE);
-                    refManager.addQuad(qNoHit);
+                    quad = EasyTex::textureAt(ET_TEXTURE_NO_HIT, GRID_ORIGINE_LEFT + GRID_STEP_RATE * x, GRID_ORIGINE_TOP + GRID_STEP_RATE * y, 50, GRID_SHIP_SCALE);
                     break;
-
                 case 2:
-                    auto qHit = EasyTex::textureAt(ET_TEXTURE_HIT, GRID_ORIGINE_LEFT + GRID_STEP_RATE * x, GRID_ORIGINE_TOP + GRID_STEP_RATE * y, 50, GRID_SHIP_SCALE);
-                    refManager.addQuad(qHit);
+                    quad = EasyTex::textureAt(ET_TEXTURE_HIT, GRID_ORIGINE_LEFT + GRID_STEP_RATE * x, GRID_ORIGINE_TOP + GRID_STEP_RATE * y, 50, GRID_SHIP_SCALE);
                     break;
             }
+            if(quad) refManager.addQuad(*quad);
         }
     }
 }
