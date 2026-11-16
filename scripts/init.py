@@ -173,14 +173,33 @@ if __name__ == '__main__':
 
     # Run license generator
     projectName = mox.ExtractLuaDef("./mox.lua", "cmox_product_name")
+    # Disclaimer shown at the top of LICENSE.html (markdown). It summarizes ./LICENSE,
+    # which is printed in full right below it - keep both in sync.
+    licenseDisclaimer = "\n".join((
+        f"**{projectName} is divided into 3 parts that are licensed differently:**",
+        "",
+        "1. **C++ and shader source code** - MIT License, Copyright (c) 2021 Ludwig Füchsl. "
+        "XAudioLoader.h and XAudioLoader.cpp contain source code copied from the Microsoft Documentation "
+        "(Copyright Microsoft Corporation / Windows Docs, CC BY 4.0). The source code is not redistributed via the installer.",
+        "2. **Game resources** - Copyright (c) 2021 Ludwig Füchsl. You are not allowed to copy, extract, edit, share "
+        "and or redistribute any of the included resource files, nor any of the installed files. "
+        "Resources were partially created using resources from PixaBay and Freesound (CC0). "
+        "Some resources were licensed for this project from Audio Jungle (not created or owned by the author).",
+        "3. **Game installer** - Copyright (c) 2021 Ludwig Füchsl, shareware licensed under "
+        "[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/). This applies to the single installer file only; "
+        "the files produced by the installer are licensed under (2).",
+        "",
+        "This is a summary. The complete terms are in the **License** section below; "
+        "the licenses of the bundled third-party software follow after it.",
+    ))
     mox.RunChecked((
         sys.executable,
         "./scripts/generate_licenses.py",
         "--project-name", projectName,
         # Change this if you don't use default LICENSE path/naming:
-        "--project-license", "./LICENSE", 
-        # Uncomment this if you dont need a disclaimer or write your own:
-        # "--disclaimer", "",
+        "--project-license", "./LICENSE",
+        # Project specific disclaimer (replaces the MoxPP default warning):
+        "--disclaimer", licenseDisclaimer,
         # You can add a custom "./license.yml" file to describe non conan licenses (see scripts\generate_licenses.py for the file format)
         "--additional-licenses", "./licenses.yml",
         # Change this to output to a different file 

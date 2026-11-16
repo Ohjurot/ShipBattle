@@ -1,6 +1,18 @@
 """
-The deployment script is written minimal by default!
-Add your own code to the main "function"
+ShipBattle deployment. Produces three artifacts in ./deploy:
+  1. Source zip        (git archive of HEAD)
+  2. Portable game zip (unzip and run)
+  3. Windows installer (NSIS)
+
+The game packages contain:
+  - ShipBattle.exe and all DLLs of the build output
+  - res/      the assets from ./app/res
+  - shaders/  ONLY the compiled shader blobs (*.cso) from ./app/shaders
+  - LICENSE.html
+
+Shader sources are not shipped. The .cso blobs are written by
+the game itself when it is started from a dev checkout, so they have to exist on disk
+before deploying: the script fails with an error when one is missing.
 
 The script is by default called with "Release" in the first argument
 
@@ -27,9 +39,71 @@ SOFTWARE.
 import os
 import mox
 import sys
-import zipfile
+import glob
 import platform
 import argparse
+
+# Compiled shader blobs the game loads at startup (see src/wWinMain.cpp)
+REQUIRED_SHADER_BLOBS = (
+    "RootSignature.cso",
+    "ImageQuadVS.cso",
+    "ImageQuadPS.cso",
+)
+
+ASSET_DIR = "./app/res"
+SHADER_DIR = "./app/shaders"
+
+
+def Fail(message):
+    print(f"ERROR: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+def CollectGameFiles(bin_folder, exe_name):
+    """Return the (source, name-in-package) pairs shared by the zip and the installer."""
+    files = []
+
+    # Executable
+    exe_path = f"{bin_folder}/{exe_name}"
+    if not os.path.isfile(exe_path):
+        Fail(f'Executable not found: {exe_path} (run "mox build" for this configuration first)')
+    files.append((exe_path, exe_name))
+
+    # All DLLs of the build output (top level of the output folder)
+    for dll in sorted(glob.glob(f"{bin_folder}/*.dll")):
+        files.append((dll, os.path.basename(dll)))
+
+    # Assets (whole tree, without dot files such as .gitattributes)
+    if not os.path.isdir(ASSET_DIR):
+        Fail(f"Asset folder not found: {ASSET_DIR}")
+    for root, dirs, names in os.walk(ASSET_DIR):
+        rel = os.path.relpath(root, ASSET_DIR).replace("\\", "/")
+        dst_dir = "res" if rel == "." else f"res/{rel}"
+        for name in sorted(names):
+            if not name.startswith("."):
+                files.append((os.path.join(root, name), f"{dst_dir}/{name}"))
+
+    # Compiled shaders: must exist, sources are never shipped
+    missing = [blob for blob in REQUIRED_SHADER_BLOBS if not os.path.isfile(f"{SHADER_DIR}/{blob}")]
+    if missing:
+        Fail(
+            f'Compiled shader(s) missing in {SHADER_DIR}: {", ".join(missing)}\n'
+            f"       They are generated when the game runs from the dev checkout. Start the game once, then deploy again."
+        )
+    blob_times = [os.path.getmtime(f"{SHADER_DIR}/{blob}") for blob in REQUIRED_SHADER_BLOBS]
+    source_times = [os.path.getmtime(src) for src in glob.glob(f"{SHADER_DIR}/*.slang")]
+    if source_times and max(source_times) > min(blob_times):
+        print("WARNING: A shader source is newer than the compiled .cso files. Start the game once to recompile them.")
+    for blob in REQUIRED_SHADER_BLOBS:
+        files.append((f"{SHADER_DIR}/{blob}", f"shaders/{blob}"))
+
+    # License report
+    if not os.path.isfile("./LICENSE.html"):
+        Fail('./LICENSE.html not found (run "mox init" first)')
+    files.append(("./LICENSE.html", "LICENSE.html"))
+
+    return files
+
 
 if __name__ == '__main__':
     # Configuration for the build
@@ -43,64 +117,41 @@ if __name__ == '__main__':
     version = mox.GetAppVersion()
     arch = mox.GetPlatformInfo(args.arch)["premake_arch"]
     build_folder = f'./build/{arch}-{args.conf}'
+    exeName = f"{appName}.exe"
 
-    # TODO: Add your own implementation
-    #       We do some quick example here
+    # Collect and validate everything BEFORE the first artifact is written
+    gameFiles = CollectGameFiles(f"{build_folder}/bin", exeName)
+    print(f"Packaging {len(gameFiles)} game files:")
+    for src, name in gameFiles:
+        print(f"  {name}")
 
-    # == Simple zip archive with the software (dumb copy) ==
-    # Also add the msvc redists via "AddMSVCRedists" call (does nothing is not on windows!)
+    # == 1. Source archive ==
+    srcArchive = mox.MDSrc(mox.AutomaticFilename(f"{appName}_src", version, args.conf, args.arch, "zip"))
+    srcArchive.Deploy()
+
+    # == 2. Portable game zip ==
     zipArchive = mox.MDZip(mox.AutomaticFilename(f"{appName}", version, args.conf, args.arch, "zip"))
-    zipArchive.AddFolder(f'{build_folder}/bin', '')
-    zipArchive.AddFile("./LICENSE.html", "LICENSE.html")
-    # zipArchive.AddMSVCRedists() <-- Add this when you want to distribute redists. REMARK: This will include latest redists (most recent install visual studio). Please make sure you check licensing
+    for src, name in gameFiles:
+        zipArchive.AddFile(src, name)
     zipArchive.Deploy()
 
-    # == Windows installer (NSIS, Modern UI 2). Deploy() is skipped with a warning on non windows systems. ==
-    # The first call bootstraps a portable NSIS into ./dependencies/nsis (plus plug-ins when needed).
-    # All Set* calls are optional, see scripts/mox/mdnsis.py for the full API.
+    # == 3. Windows installer (NSIS, Modern UI 2) ==
+    # The first call bootstraps a portable NSIS into ./dependencies/nsis. See scripts/mox/mdnsis.py for the full API.
     installer = mox.MDNSIS(mox.AutomaticFilename(f"{appName}", version, args.conf, args.arch, "exe"), appName, version, args.arch)
-    installer.SetMeta(publisher="Moxibyte GmbH", description=f"{appName} Installer", url="https://github.com/moxibyte/MoxPP") # <-- Adjust to your product
-    installer.SetMainExecutable("hello_world.exe")           # Used for the display icon and run after install
-    installer.SetLicense("./LICENSE.html")                   # .html is rendered via the EmbedHTML plug-in (.txt/.rtf also supported)
-    installer.SetReadme(text=f"Thank you for installing {appName} {version}.\n\nThis is a free text information page shown before the installation starts.")
-    installer.SetInstallScopes(("machine", "user"))          # Both supported -> the end user chooses inside the installer
-    installer.SetRunAfterInstall(True)                       # "Run hello_world" checkbox on the finish page
-    # installer.SetLanguages(("English", "German"))          # More than one language shows a language selection dialog
-    # installer.SetIcons("./res/install.ico", "./res/uninstall.ico")
-    # installer.SetTheme(headerImage="./res/header.bmp", welcomeImage="./res/welcome.bmp")
+    installer.SetMeta(publisher="Ludwig Fuechsl", description=f"{appName} Installer", url="https://github.com/Ohjurot/ShipBattle")
+    installer.SetMainExecutable(exeName)                     # Used for the display icon and run after install
+    installer.SetLicense("./LICENSE.html")
+    installer.SetInstallScopes(("machine", "user"))          # The end user chooses inside the installer
+    installer.SetRunAfterInstall(True)
 
-    # Components: files, shortcuts and actions bind to the most recent StartComponent() call.
-    # "Group/Leaf" paths create section groups. The components page is only shown when an optional component exists.
-    installer.StartComponent("Application", required=True, description="Core application files")
-    installer.AddFolder(f'{build_folder}/bin', '')
-    installer.AddFile("./LICENSE.html", "LICENSE.html")
-    # installer.AddMSVCRedists()                                        # Installs the redist silently. See licensing remark above
-    # installer.AddPostInstallAction("hello_world.exe", "--first-run")  # Runs hidden after the files, output in the install log
-    # installer.AddPreUninstallAction("hello_world.exe", "--cleanup")   # Runs before the uninstaller removes files
+    installer.StartComponent("Game", required=True, description=f"{appName} game files")
+    for src, name in gameFiles:
+        installer.AddFile(src, name)
 
     installer.StartComponent("Shortcuts/Start Menu", description="Start menu entries")
-    installer.AddShortcut("hello_world.exe", appName, "startmenu")
+    installer.AddShortcut(exeName, appName, "startmenu")
     installer.AddShortcut("Uninstall.exe", f"Uninstall {appName}", "startmenu")
 
     installer.StartComponent("Shortcuts/Desktop", default=False, description="Desktop shortcut")
-    installer.AddShortcut("hello_world.exe", appName, "desktop")
+    installer.AddShortcut(exeName, appName, "desktop")
     installer.Deploy()
-
-    # == Debian package (dpkg-deb). Deploy() is skipped when dpkg-deb is not available (windows / macos / non debian) ==
-    # Destinations are absolute linux install paths. Symlinks (e.g. shared lib chains) are preserved.
-    debName = appName.lower()
-    package = mox.MDDPkg(mox.AutomaticFilename(f"{appName}", version, args.conf, args.arch, "deb"), debName, version, args.arch)
-    package.SetMeta(maintainer="Moxibyte GmbH <sales@moxibyte.com>", description=f"{appName} example application", section="utils", priority="optional", homepage="https://github.com/moxibyte/MoxPP") # <-- Adjust to your product
-    package.AddFolder(f'{build_folder}/bin', f'opt/{debName}')                   # Binaries and shared libs stay together (no rpath needed)
-    package.AddSymlink(f'usr/bin/hello_world', f'/opt/{debName}/hello_world')
-    package.AddFile("./LICENSE.html", f'usr/share/doc/{debName}/LICENSE.html')
-    package.AddDependency("libc6")                                                # package.AddDependency("libssl3", ">= 3.0")
-    package.AppendPostInstall(f'echo "{appName} {version} installed"')           # Every Append* call adds lines to the respective maintainer script
-    # package.AppendPostInstall(f'setcap CAP_NET_BIND_SERVICE=+eip /opt/{debName}/hello_world')
-    package.AppendPreRemove(f'echo "Removing {appName}"')
-    package.AppendPostRemove(f'echo "Removed {appName}"')
-    package.Deploy()
-
-    # == Source archive ==
-    srcArchive = mox.MDSrc(mox.AutomaticFilename(f"{appName}_src", version, args.conf, args.arch, "zip"))
-    srcArchive.Deploy()
